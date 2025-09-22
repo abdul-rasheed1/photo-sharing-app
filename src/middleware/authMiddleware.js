@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import'dotenv/config';
+import 'dotenv/config';
 
 export const jwtCheck = (req,res,next) => {
 	try{
@@ -13,7 +13,7 @@ export const jwtCheck = (req,res,next) => {
 		if(!token){
 			return res.status(401).json({message:"Token not found"});
 		}
-		const verifyJwt = jwt.verify(token, process.env.JWT_SERCETE);
+		const verifyJwt = jwt.verify(token, process.env.JWT_SECRETE);
 
 		req.user = verifyJwt;
 		next();

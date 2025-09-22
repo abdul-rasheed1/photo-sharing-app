@@ -4,11 +4,12 @@ import validator from 'validator';
 import {signUp,findUser} from '../services/user_service.js';
 import jwt from 'jsonwebtoken'
 import 'dotenv/config';
+import {jwtCheck} from '../middleware/authMiddleware.js';
 
 
-export const router = express.Router();
+export const usersRouter = express.Router();
 
-router.post('/signup', async(req,res)=>{
+usersRouter.post('/signup', async(req,res)=>{
 	try{
 	const {username, password, email} = req.body;
 	if (!username || !password || !email){
@@ -25,8 +26,9 @@ router.post('/signup', async(req,res)=>{
 	const hashedPassword = await bcrypt.hash(password, salt);
 
 	const signedUp = await signUp(username, hashedPassword, email);
+	//console.log(signedUp);
 
-	return res.status(201).json({message:`user created successfully`, userid: signedUp.rows[0].id});
+	return res.status(201).json({message:`user created successfully`, userid: signedUp.id});
 
 	}
 catch(e){
@@ -37,12 +39,12 @@ catch(e){
 })
 
 
-router.post('/login', async(req,res)=>{
+usersRouter.post('/login', async(req,res)=>{
 	try{
 		const{username, password} = req.body;
 		const user = await findUser(username);
 		if(user.length === 0){
-			console.log(username or email not found)
+			console.log("username or email not found");
 			return res.status(400).json({message: 'Invalid request data'});
 		}
 		const passwordCheck = await bcrypt.compare(password, user[0].password);
@@ -53,7 +55,8 @@ router.post('/login', async(req,res)=>{
 		}
 
 		console.log('Login successfull');
-		const token = jwt.sign({id:user[0].id}, process.env.JWT_SECRETE,{expiresIn:'5m'});
+		const token = jwt.sign({id:user[0].id}, process.env.JWT_SECRETE,{expiresIn:'1hr'});
+		console.log(token);
 
 		return res.status(200).json({message:'Login successfull', jwt:token});
 
@@ -67,8 +70,14 @@ router.post('/login', async(req,res)=>{
 
 
 
-router.post('/logout', async(req,res)=>{
-	res.status(200).json({message:'logged out succesfully'})
+usersRouter.post('/logout', async(req,res)=>{
+	res.status(200).json({message:'logged out succesfully'});
+});
+
+
+usersRouter.get('/protected',jwtCheck, (req,res)=>{
+	res.status(200).json({message: 'Access granted' , userId: req.user});
+
 })
 
 
