@@ -19,7 +19,7 @@ export const jwtCheck = (req,res,next) => {
 		next();
 
 	}catch(e){
-		return res.status(401).json({message:"Invalid pr expired token"});
+		return res.status(401).json({message:"Invalid or expired token", error:e});
 	}
 
 }
