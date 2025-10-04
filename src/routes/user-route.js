@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
-import {signUp,findUser} from '../services/user_service.js';
+import {signUp,findUser,sendToken,tokenCheck, deleteToken} from '../services/user_service.js';
 import jwt from 'jsonwebtoken'
 import 'dotenv/config';
 import {jwtCheck} from '../middleware/authMiddleware.js';
@@ -55,10 +55,14 @@ usersRouter.post('/login', async(req,res)=>{
 		}
 
 		console.log('Login successfull');
-		const token = jwt.sign({id:user[0].id}, process.env.JWT_SECRETE,{expiresIn:'1hr'});
-		console.log(token);
+		const accessToken = jwt.sign({id:user[0].id}, process.env.JWT_SECRETE,{expiresIn:'15m'});
+		//console.log(token);
 
-		return res.status(200).json({message:'Login successfull', jwt:token});
+		const refreshToken = jwt.sign({id:user[0].id}, process.env.JWT_REFRESH_SECRETE, {expiresIn:'8616hr'});
+
+		const refreshTokenToDb = await sendToken(user[0].id, refreshToken);
+
+		return res.status(200).json({message:'Login successfull', accessJwt:accessToken, refreshJwt:refreshToken, username:user[0].username,email:user[0].email});
 
 
 
@@ -74,6 +78,45 @@ usersRouter.post('/logout', async(req,res)=>{
 	res.status(200).json({message:'logged out succesfully'});
 });
 
+
+usersRouter.post('/refresh', async(req,res)=>{
+	try{
+		const authHeader = req.headers.authorization;
+		if (!authHeader){
+			return res.status(401).json({message:"header not found"});
+		}
+
+		const headerArr = authHeader.split(' ');
+		const Token = headerArr[1];
+		if(!Token){
+			return res.status(401).json({message:"Token not found"});
+		}
+
+		const verifiedToken = jwt.verify(Token, process.env.JWT_REFRESH_SECRETE); 
+
+		const checkToken = await tokenCheck(verifiedToken.id, Token);
+
+		if (checkToken.length === 0){
+			return res.status(401).json({message:"Token not found"});
+		}
+
+		const delToken = await deleteToken(verifiedToken.id,Token);
+
+		const aToken = jwt.sign({id:verifiedToken.id}, process.env.JWT_SECRETE, {expiresIn:'15m'});
+		const rToken = jwt.sign({id:verifiedToken.id}, process.env.JWT_REFRESH_SECRETE, {expiresIn:'8616hr'});
+
+		await sendToken(verifiedToken.id, rToken);
+
+
+		return res.status(201).json({message:"New Token generated", accessToken:aToken, refreshToken:rToken});
+
+	}catch(e){
+		console.error(e);
+		return res.status(500).json({message:"Internal Server Error"});
+
+	}
+
+});
 
 usersRouter.get('/protected',jwtCheck, (req,res)=>{
 	res.status(200).json({message: 'Access granted' , userId: req.user});
