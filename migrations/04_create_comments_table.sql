@@ -1,0 +1,6 @@
+CREATE TABLE comments(
+comment_id SERIAL PRIMARY KEY,
+user_id INT NOT NULL REFERENCES users(id),
+post_id INT NOT NULL REFERENCES posts(id),
+comment_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

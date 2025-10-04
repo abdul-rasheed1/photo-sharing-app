@@ -1,0 +1,6 @@
+CREATE TABLE likes(
+like_id SERIAL PRIMARY KEY,
+user_id INT NOT NULL REFERENCES users(id),
+post_id INT NOT NULL REFERENCES posts(id),
+liked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

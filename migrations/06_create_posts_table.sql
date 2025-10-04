@@ -1,0 +1,6 @@
+CREATE TABLE posts(
+post_id SERIAL PRIMARY KEY,
+user_id INT NOT NULL REFERENCES users(id),
+posted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+caption TEXT
+);
