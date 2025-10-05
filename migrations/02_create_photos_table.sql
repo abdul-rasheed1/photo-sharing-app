@@ -1,7 +1,6 @@
 CREATE TABLE photos(
 photo_id SERIAL PRIMARY KEY,
-user_id INT NOT NULL REFERENCES users(id),
-caption TEXT,
+user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 posted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 phot_url TEXT NOT NULL,
 );
