@@ -1,5 +1,5 @@
 import express from 'express';
-import {fileToCloud, urlToDb, postToDb} from '../services/post-service.js';
+import {fileToCloud, urlToDb, postToDb, getAllPosts} from '../services/post-service.js';
 import {upload} from '../middleware/multerMiddleware.js';
 import {jwtCheck} from '../middleware/authMiddleware.js';
 
@@ -34,3 +34,15 @@ postRouter.post('/createPost', jwtCheck,upload.single('photo'), async(req,res)=>
 	}
 
 }) 
+
+postRouter.get('/', jwtCheck, async(req,res)=>{
+	try{
+		const allPosts = await getAllPosts();
+		return res.status(200).json({message:"all posts retrieved successfully", posts:allPosts});
+
+	}
+	catch(e){
+		console.error(e);
+		return res.status(500).json({message:"Internal Server Error"});
+	}
+})

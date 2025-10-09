@@ -31,3 +31,17 @@ export const postToDb = async(Id, caption) =>{
 	const result = await pool.query(query, [Id, caption]);
 	return result.rows[0];
 }
+
+export const getAllPosts = async() => { 
+	const query = 	`SELECT p.post_id, p.caption, p.posted_at,u.username, m.photo_url 
+					FROM posts p 
+					JOIN users u ON p.user_id = u.id 
+					LEFT JOIN photos m ON p.post_id = m.post_id
+					ORDER BY p.posted_at DESC
+					LIMIT 10`;
+
+	const result = await pool.query(query);
+	return result.rows;
+
+
+}

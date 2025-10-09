@@ -4,7 +4,7 @@ import 'dotenv/config';
 export const jwtCheck = (req,res,next) => {
 	try{
 		const authHeader  = req.headers.authorization; 
-		console.log(`this is teh authheader: ${authHeader}`);
+		//console.log(`this is the authheader: ${authHeader}`);
 
 		if (!authHeader){
 			return res.status(401).json({message:"authentication header missing"});
