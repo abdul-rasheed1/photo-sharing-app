@@ -11,14 +11,14 @@ export const signUp = async(username, hashedPassword, email) =>{
 export const findUser = async(cred) =>{
 	const query = `SELECT id, username, password FROM users WHERE username = $1 OR email = $2`;
 	const result = await pool.query(query,[cred,cred]);
-	console.log(result.rows);
+	//console.log(result.rows);
 	return result.rows;
 } 
 
 export const sendToken = async(user_id, token)=>{
 	const query = 'INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)';
 	const result = await pool.query(query,[user_id,token]);
-	console.log(result.rowCount);
+	//console.log(result.rowCount);
 	return result.rowCount;
 }
 

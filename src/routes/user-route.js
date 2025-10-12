@@ -55,7 +55,7 @@ usersRouter.post('/login', async(req,res)=>{
 		}
 
 		console.log('Login successfull');
-		const accessToken = jwt.sign({id:user[0].id}, process.env.JWT_SECRETE,{expiresIn:'15m'});
+		const accessToken = jwt.sign({id:user[0].id}, process.env.JWT_SECRETE,{expiresIn:'1hr'});
 		//console.log(token);
 
 		const refreshToken = jwt.sign({id:user[0].id}, process.env.JWT_REFRESH_SECRETE, {expiresIn:'8616hr'});
@@ -102,7 +102,7 @@ usersRouter.post('/refresh', async(req,res)=>{
 
 		const delToken = await deleteToken(verifiedToken.id,Token);
 
-		const aToken = jwt.sign({id:verifiedToken.id}, process.env.JWT_SECRETE, {expiresIn:'15m'});
+		const aToken = jwt.sign({id:verifiedToken.id}, process.env.JWT_SECRETE, {expiresIn:'1hr'});
 		const rToken = jwt.sign({id:verifiedToken.id}, process.env.JWT_REFRESH_SECRETE, {expiresIn:'8616hr'});
 
 		await sendToken(verifiedToken.id, rToken);
