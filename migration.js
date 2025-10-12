@@ -26,7 +26,12 @@ const runMigration = async()=>{
 		for (const file of newMigrations){
 			console.log(`Applying new migration ${file}`);
 			const sql = readFileSync(`./migrations/${file}`, 'utf-8');
-			await client.query(sql);
+
+			await client.query(sql, (err,res)=>{
+				if(!err){
+					console.log(res.command);
+				}
+			});
 			await client.query(`INSERT INTO migration (name) VALUES ($1)`, [file]);
 
 			console.log(`migration completed successfully`);
