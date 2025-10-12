@@ -33,10 +33,13 @@ export const postToDb = async(Id, caption) =>{
 }
 
 export const getAllPosts = async() => { 
-	const query = 	`SELECT p.post_id, p.caption, p.posted_at,u.username, m.photo_url 
+	const query = 	`SELECT p.post_id, p.caption, p.posted_at,u.username, m.photo_url, COUNT(DISTINCT l.like_id) AS likeCount, COUNT(DISTINCT c.id) AS commentCount
 					FROM posts p 
 					JOIN users u ON p.user_id = u.id 
 					LEFT JOIN photos m ON p.post_id = m.post_id
+					LEFT JOIN likes l ON p.post_id = l.post_id
+					LEFT JOIN comments c ON p.post_id = c.post_id
+					GROUP BY p.post_id, p.caption, p.posted_at, u.username, m.photo_url
 					ORDER BY p.posted_at DESC
 					LIMIT 10`;
 
@@ -44,4 +47,25 @@ export const getAllPosts = async() => {
 	return result.rows;
 
 
+}
+
+export const delPost = async(post_id,user_id) =>{
+	const query = `DELETE FROM posts WHERE post_id = $1 AND user_id = $2 RETURNING post_id`;
+	const result = await pool.query(query,[post_id,user_id]);
+	return result;
+}
+
+
+export const userPosts = async(id) =>{
+	const query = `SELECT p.post_id, p.caption, p.posted_at,u.username, m.photo_url, COUNT(DISTINCT l.like_id) AS likeCount, COUNT(DISTINCT c.id) AS commentCount
+					FROM posts p 
+					JOIN users u ON p.user_id = u.id 
+					LEFT JOIN photos m ON p.post_id = m.post_id
+					LEFT JOIN likes l ON p.post_id = l.post_id
+					LEFT JOIN comments c ON p.post_id = c.post_id
+					WHERE p.user_id = $1
+					GROUP BY p.post_id, p.caption, p.posted_at, u.username, m.photo_url
+					ORDER BY p.posted_at DESC`;
+	const result = await pool.query(query, [id]);
+	return result.rows;
 }
